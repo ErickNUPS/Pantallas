@@ -20,15 +20,26 @@
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-start;
-      gap: 80px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
     }
- .left-column img {
-      width: 380px;
-      margin: 8px 2px;
-      max-width: 250px;
+    
+    .logo-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
     }
+    
+    .left-column img.logo {
+      max-width: 380px;
+    }
+    
+    .left-column img.daruma {
+      width: 190px;
+      margin: auto;
+    }
+    
     .right-column {
       width: 100%;
       padding: 500px;
@@ -344,8 +355,10 @@
 </head>
 <body>
   <div class="left-column">
-    <img src="logo.png" alt="Logo CROCSA"> 
-    <img src="/daruma_con_cascov2.PNG" alt="Daruma con casco" >
+    <div class="logo-container">
+      <img src="logo.png" alt="Logo CROCSA" class="logo"> 
+    </div>
+    <img src="/daruma_con_cascov2.PNG" alt="Daruma con casco" class="daruma">
   </div>
   <div class="right-column">
     <div class="page page-1 active">
