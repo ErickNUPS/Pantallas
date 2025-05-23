@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard CROCSA Minimalista</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #f8f9fa;
+    }
+
+    .left-column {
+      width: 30%;
+      background-color: #e9ecef;
+      padding: 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 80px;
+    }
+ .left-column img {
+      width: 380px;
+      margin: 8px 2px;
+      max-width: 250px;
+    }
+    .right-column {
+      width: 100%;
+      padding: 500px;
+      box-sizing: border-box;
+      background: #ffffff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      padding: 60px;
+    }
+
+    .page.active {
+      opacity: 1;
+      transform: translateX(0);
+      z-index: 1;
+    }
+
+    /* Estilos para la primera página */
+    .page-1 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 30px;
+      padding: 30px;
+    }
+
+    .gauge-wrapper {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gauge-circle {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: conic-gradient(red 0deg 120deg, yellow 120deg 240deg, green 240deg 360deg);
+      position: relative;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .gauge-value {
+      font-size: 3.5rem;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .needle {
+      position: absolute;
+      top: 3%;
+      left: 50%;
+      width: 3px;
+      height: 140px;
+      background-color: black;
+      transform-origin: bottom center;
+      transform: rotate(0deg);
+      transition: transform 0.4s ease;
+      z-index: 10;
+    }
+
+    .center-dot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 16px;
+      height: 16px;
+      background: black;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 11;
+    }
+
+    .budget-container {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .budget-card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 50px;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      height: calc(50% - 15px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      border: 1px solid #ddd;
+    }
+
+    th, td {
+      padding: 15px;
+      border: 1px solid #ddd;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+
+    th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+      font-size: 1.6rem;
+    }
+
+    input[type="number"] {
+      width: 150px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    .semaforo-container {
+      display: flex;
+      flex-direction: column;
+      width: 40px;
+      height: 120px;
+      margin: auto;
+      background: #333;
+      border-radius: 15px;
+      padding: 8px;
+      gap: 8px;
+    }
+
+    .luz {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background-color: #555;
+      margin: auto;
+      transition: background-color 0.2s;
+    }
+
+    .activo-verde { background-color: #4CAF50; }
+    .activo-amarillo { background-color: #FFC107; }
+    .activo-rojo { background-color: #F44336; }
+
+    /* Estilos para la segunda página - VERSION COMPACTA */
+    .page-2 {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .page-2 h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+      font-size: 3rem;
+    }
+
+    .projects-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      overflow-y: auto;
+      flex-grow: 1;
+      padding-right: 10px;
+    }
+
+    .proyecto {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .proyecto h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #333;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .project-dates {
+      display: flex;
+      gap: 12px;
+      font-size: 0.9rem;
+    }
+
+    .bar-container {
+      margin: 10px 0;
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+      font-size: 1.5rem;
+    }
+
+    .barra {
+      height: 18px;
+      border-radius: 4px;
+      position: relative;
+      background: #eee;
+    }
+
+    .progreso {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    .tiempo { background: #64B5F6; }
+    .real { background: #4CAF50; }
+
+    .project-status {
+      font-weight: bold;
+      margin-top: 10px;
+      padding: 6px;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 1.2rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin: 10px 0;
+      height: 6px;
+      border-radius: 3px;
+    }
+
+    input[type="text"], input[type="date"] {
+      padding: 6px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1.2rem;
+    }
+
+    /* Botones de navegación */
+    .navigation-controls {
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(160%);
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .nav-button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      background-color: #0066cc;
+      color: white;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.3s;
+    }
+
+    .nav-button:hover {
+      background-color: #0055aa;
+    }
+
+    .direction-buttons {
+      display: none;
+    }
+
+    /* Scrollbar personalizada */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="left-column">
+    <img src="logo.png" alt="Logo CROCSA"> 
+    <img src="/daruma_con_cascov2.PNG" alt="Daruma con casco" >
+  </div>
+  <div class="right-column">
+    <div class="page page-1 active">
+      <div class="budget-container">
+        <div class="budget-card">
+          <table>
+            <tr><th colspan="2">Presupuesto del Año</th></tr>
+            <tr><td>Asignado $</td><td><input type="number" id="presupuesto" value="1000000"></td></tr>
+            <tr><td>Gastado $</td><td><input type="number" id="gastado" value="300000"></td></tr>
+            <tr><td>Estatus</td><td><div class="semaforo-container"><div class="luz" id="luz-verde"></div><div class="luz" id="luz-amarillo"></div><div class="luz" id="luz-rojo"></div></div></td></tr>
+          </table>
+        </div>
+        
+        <div class="budget-card">
+          <table>
+            <tr><th colspan="2">Presupuesto de Ventas</th></tr>
+            <tr><td>Meta $</td><td><input type="number" id="metaVentas" value="500000"></td></tr>
+            <tr><td>Actual $</td><td><input type="number" id="ventasActual" value="300000"></td></tr>
+            <tr><td>Estatus</td><td><div class="semaforo-container"><div class="luz" id="ventas-verde"></div><div class="luz" id="ventas-amarillo"></div><div class="luz" id="ventas-rojo"></div></div></td></tr>
+          </table>
+        </div>
+      </div>
+      
+      <div class="gauge-wrapper">
+        <div class="gauge-circle" id="gauge">
+          <div class="needle" id="needle"></div>
+          <div class="center-dot"></div>
+        </div>
+        <div class="gauge-value" id="valTexto">70</div>
+        <div style="width: 100%; text-align: center;">
+          <div style="font-weight: bold; margin-bottom: 15px; font-size: 4rem;">Proyectos Ganados</div>
+          <input type="range" id="valor" min="0" max="100" value="70" style="width: 80%;" oninput="actualizarDashboard()">
+        </div>
+      </div>
+    </div>
+    
+    <div class="page page-2">
+      <h2>📋 Seguimiento de Proyectos</h2>
+      <div class="projects-list" id="contenedor-proyectos"></div>
+    </div>
+
+    <div class="navigation-controls">
+      <button id="toggle-transition" class="nav-button">Pausar transición</button>
+      <div class="direction-buttons">
+        <button id="prev-page" class="nav-button">Anterior</button>
+        <button id="next-page" class="nav-button">Siguiente</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const proyectos = [
+      { id: 'A', nombre: 'Proyecto Alpha', inicio: '2025-05-01', fin: '2025-08-01', tiempo: 40, real: 30 },
+      { id: 'B', nombre: 'Proyecto Beta', inicio: '2025-06-01', fin: '2025-09-15', tiempo: 60, real: 60 },
+      { id: 'C', nombre: 'Proyecto Gamma', inicio: '2025-04-15', fin: '2025-07-31', tiempo: 80, real: 50 },
+      { id: 'D', nombre: 'Proyecto Delta', inicio: '2025-07-01', fin: '2025-10-31', tiempo: 20, real: 15 },
+      { id: 'E', nombre: 'Proyecto Épsilon', inicio: '2025-05-15', fin: '2025-09-30', tiempo: 50, real: 45 }
+    ];
+
+    function crearProyecto(p) {
+      const div = document.createElement('div');
+      div.className = 'proyecto';
+      div.innerHTML = `
+        <div class="project-header">
+          <h3>📋 <input type="text" id="nombre${p.id}" value="${p.nombre}" style="flex-grow: 1; width: 1100px;"></h3>
+          <div class="project-dates">
+            <div><strong>Inicio:</strong> <input type="date" id="inicio${p.id}" value="${p.inicio}" style="width: 150px;"></div>
+            <div><strong>Fin:</strong> <input type="date" id="fin${p.id}" value="${p.fin}" style="width: 150px;"></div>
+          </div>
+        </div>
+        
+        <div class="bar-container">
+          <div class="bar-label">
+            <span>Línea del tiempo</span>
+            <span id="tiempoTexto${p.id}">${p.tiempo}%</span>
+          </div>
+          <input type="range" id="tiempo${p.id}" min="0" max="100" value="${p.tiempo}">
+          <div class="barra">
+            <div class="progreso tiempo" id="barraTiempo${p.id}" style="width: ${p.tiempo}%;"></div>
+          </div>
+          <div style="text-align: right; font-size: 1.2rem; color: #666;">
+            Fecha simulada: <span id="fechaSimulada${p.id}">--</span>
+          </div>
+        </div>
+        
+        <div class="bar-container">
+          <div class="bar-label">
+            <span>Avance real</span>
+            <span id="realTexto${p.id}">${p.real}%</span>
+          </div>
+          <input type="range" id="real${p.id}" min="0" max="100" value="${p.real}">
+          <div class="barra">
+            <div class="progreso real" id="barraReal${p.id}" style="width: ${p.real}%;"></div>
+          </div>
+        </div>
+        
+        <div class="project-status" id="estado${p.id}">
+          📈 Estado del rendimiento: ---
+        </div>
+      `;
+      document.getElementById('contenedor-proyectos').appendChild(div);
+      document.querySelectorAll(`#inicio${p.id}, #fin${p.id}, #tiempo${p.id}, #real${p.id}`).forEach(el => {
+        el.addEventListener('input', () => actualizarEstado(p.id));
+      });
+      actualizarEstado(p.id);
+    }
+
+    function actualizarEstado(id) {
+      const inicio = new Date(document.getElementById(`inicio${id}`).value);
+      const fin = new Date(document.getElementById(`fin${id}`).value);
+      const porcentajeTiempo = parseInt(document.getElementById(`tiempo${id}`).value);
+      const porcentajeReal = parseInt(document.getElementById(`real${id}`).value);
+      const total = fin - inicio;
+      const fechaSimulada = new Date(inicio.getTime() + (porcentajeTiempo / 100) * total);
+      const fechaTexto = isNaN(fechaSimulada) ? '--' : fechaSimulada.toISOString().split("T")[0];
+      
+      document.getElementById(`barraTiempo${id}`).style.width = porcentajeTiempo + "%";
+      document.getElementById(`tiempoTexto${id}`).textContent = porcentajeTiempo + "%";
+      document.getElementById(`barraReal${id}`).style.width = porcentajeReal + "%";
+      document.getElementById(`realTexto${id}`).textContent = porcentajeReal + "%";
+      document.getElementById(`fechaSimulada${id}`).textContent = fechaTexto;
+      
+      const estado = document.getElementById(`estado${id}`);
+      const atraso = porcentajeTiempo - porcentajeReal;
+      
+      if (porcentajeReal >= porcentajeTiempo) {
+        estado.innerHTML = "📈 Estado: 🟢 A tiempo";
+        estado.style.backgroundColor = "#E8F5E9";
+        estado.style.color = "#2E7D32";
+      } else if (atraso <= 10) {
+        estado.innerHTML = "📈 Estado: 🟡 Atrasado";
+        estado.style.backgroundColor = "#FFF8E1";
+        estado.style.color = "#FF8F00";
+      } else {
+        estado.innerHTML = "📈 Estado: 🔴 Muy atrasado";
+        estado.style.backgroundColor = "#FFEBEE";
+        estado.style.color = "#C62828";
+      }
+    }
+
+    proyectos.forEach(crearProyecto);
+
+    function actualizarDashboard() {
+      const valor = parseInt(document.getElementById('valor').value);
+      const angulo = (valor / 100) * 360;
+      document.getElementById('needle').style.transform = `rotate(${angulo}deg)`;
+      document.getElementById('valTexto').textContent = valor;
+
+      const presupuesto = parseFloat(document.getElementById('presupuesto').value);
+      const gastado = parseFloat(document.getElementById('gastado').value);
+      const porcentajeGasto = (gastado / presupuesto) * 100;
+
+      const luces1 = { verde: document.getElementById('luz-verde'), amarillo: document.getElementById('luz-amarillo'), rojo: document.getElementById('luz-rojo') };
+      for (let key in luces1) luces1[key].className = 'luz';
+      if (porcentajeGasto < 60) luces1.verde.classList.add('activo-verde');
+      else if (porcentajeGasto < 90) luces1.amarillo.classList.add('activo-amarillo');
+      else luces1.rojo.classList.add('activo-rojo');
+
+      const meta = parseFloat(document.getElementById('metaVentas').value);
+      const actual = parseFloat(document.getElementById('ventasActual').value);
+      const porcentajeVentas = (actual / meta) * 100;
+
+      const luces2 = { verde: document.getElementById('ventas-verde'), amarillo: document.getElementById('ventas-amarillo'), rojo: document.getElementById('ventas-rojo') };
+      for (let key in luces2) luces2[key].className = 'luz';
+      if (porcentajeVentas > 80) luces2.verde.classList.add('activo-verde');
+      else if (porcentajeVentas > 50) luces2.amarillo.classList.add('activo-amarillo');
+      else luces2.rojo.classList.add('activo-rojo');
+    }
+
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('input', actualizarDashboard);
+    });
+    actualizarDashboard();
+
+    // Control de la transición automática
+    let currentPage = 0;
+    const pages = document.querySelectorAll('.page');
+    let transitionInterval;
+    let isTransitionActive = true;
+    
+    const toggleBtn = document.getElementById('toggle-transition');
+    const directionButtons = document.querySelector('.direction-buttons');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+
+    function showPage(index) {
+      currentPage = index;
+      pages.forEach((p, i) => {
+        p.classList.toggle('active', i === index);
+      });
+    }
+
+    function startTransition() {
+      transitionInterval = setInterval(() => {
+        currentPage = (currentPage + 1) % pages.length;
+        showPage(currentPage);
+      }, 10000);
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      if (isTransitionActive) {
+        // Pausar la transición
+        clearInterval(transitionInterval);
+        toggleBtn.textContent = 'Reanudar transición';
+        directionButtons.style.display = 'flex';
+      } else {
+        // Reanudar la transición
+        startTransition();
+        toggleBtn.textContent = 'Pausar transición';
+        directionButtons.style.display = 'none';
+      }
+      isTransitionActive = !isTransitionActive;
+    });
+
+    prevBtn.addEventListener('click', () => {
+      currentPage = (currentPage - 1 + pages.length) % pages.length;
+      showPage(currentPage);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentPage = (currentPage + 1) % pages.length;
+      showPage(currentPage);
+    });
+
+    // Iniciar la transición automática
+    startTransition();
+  </script>
+</body>
+</html>
