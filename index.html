@@ -39,9 +39,37 @@
       width: 450px;
       margin: auto;
     }
-    
-    .right-column {
+
+    .center-column {
+      width: 20%;
+      padding: 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .drop-zone {
       width: 100%;
+      height: 150px;
+      border: 2px dashed #bbb;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #666;
+      text-align: center;
+    }
+
+    .drop-zone.over {
+      background-color: #f0f0f0;
+      border-color: #666;
+    }
+
+    .right-column {
+      width: 50%;
       padding: 500px;
       box-sizing: border-box;
       background: #ffffff;
@@ -267,6 +295,8 @@
       border-radius: 4px;
       position: relative;
       background: #eee;
+      width: 80%;
+      margin: auto;
     }
 
     .progreso {
@@ -356,9 +386,16 @@
 <body>
   <div class="left-column">
     <div class="logo-container">
-      <img src="logo.png" alt="Logo CROCSA" class="logo"> 
+      <img src="logo.png" alt="Logo CROCSA" class="logo">
     </div>
     <img src="/daruma_con_cascov2.PNG" alt="Daruma con casco" class="daruma">
+  </div>
+  <div class="center-column">
+    <div class="drop-zone">Arrastra imagen</div>
+    <div class="drop-zone">Arrastra imagen</div>
+    <div class="drop-zone">Arrastra imagen</div>
+    <div class="drop-zone">Arrastra imagen</div>
+    <div class="drop-zone">Arrastra imagen</div>
   </div>
   <div class="right-column">
     <div class="page page-1 active">
@@ -531,6 +568,29 @@
       input.addEventListener('input', actualizarDashboard);
     });
     actualizarDashboard();
+
+    // Drag and drop de imágenes
+    const zonas = document.querySelectorAll('.drop-zone');
+    zonas.forEach(zona => {
+      zona.addEventListener('dragover', e => {
+        e.preventDefault();
+        zona.classList.add('over');
+      });
+      zona.addEventListener('dragleave', () => zona.classList.remove('over'));
+      zona.addEventListener('drop', e => {
+        e.preventDefault();
+        zona.classList.remove('over');
+        const archivos = e.dataTransfer.files;
+        if (archivos.length) {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(archivos[0]);
+          img.style.maxWidth = '100%';
+          img.style.maxHeight = '100%';
+          zona.innerHTML = '';
+          zona.appendChild(img);
+        }
+      });
+    });
 
     // Control de la transición automática
     let currentPage = 0;
